@@ -1,1 +1,4 @@
-//poner aqui las librerias que se van a usar
+fastapi[all]
+pydantic
+pymongo
+requests
