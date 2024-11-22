@@ -23,8 +23,9 @@ class Team(BaseModel):
 
 class PlayerInjuries(BaseModel):
     injury_id: str = Field(default_factory=uuid.uuid4, alias='_id')
-    player_id: str = Field(...)
-    team_id: str = Field(...)
+    player_name: str = Field(...)
+    team_id:str = Field(...)
+    team_name: str = Field(...)
     injury_type: str = Field(...)
     start_date: datetime = Field(...)
     end_date: datetime = Field(...)
@@ -48,6 +49,7 @@ class Awards(BaseModel):
     award_id: str = Field(default_factory=uuid.uuid4, alias='_id')
     recipient_type: str = Field(...)
     recipient_id: str = Field(...)
+    recipient_name: str = Field(...)
     award_name: str = Field(...)
     season: str = Field(...)
     category: str = Field(...)
@@ -67,7 +69,9 @@ class Awards(BaseModel):
 class Matches(BaseModel):
     match_id: str = Field(default_factory=uuid.uuid4, alias='_id')
     home_team_id: str = Field(...)
+    home_team_name: str = Field(...)
     away_team_id: str = Field(...)
+    away_team_name: str = Field(...)
     date: datetime = Field(...)
     status: str = Field(...) #score is a string
     score: str = Field(...)
@@ -88,8 +92,11 @@ class Matches(BaseModel):
         }   
 class PlayerTransfers(BaseModel):
     team_id: str = Field(...)
+    team_name: str = Field(...)
     player_id: str = Field(...)
+    player_name: str = Field(...)
     from_team_id: str = Field(...)
+    from_team_name: str = Field(...)
     transfer_date: datetime = Field(...)
     fee: float = Field(...)
     contract_length: int = Field(...)
@@ -107,6 +114,7 @@ class PlayerTransfers(BaseModel):
         }
 class PlayerValues(BaseModel):
     player_id:str = Field(...)
+    player_name: str = Field(...)
     value_history: List[str]
     class Config:
         allow_population_by_field_name = True
