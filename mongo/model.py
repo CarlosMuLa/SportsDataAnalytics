@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import uuid
 from typing import List, Optional
 from pydantic import BaseModel, Field
@@ -124,3 +125,4 @@ class PlayerValues(BaseModel):
                 "value_history": ["1000000", "2000000", "3000000"]
             }
         }
+
