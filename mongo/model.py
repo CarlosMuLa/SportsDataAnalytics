@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import uuid
-from typing import List, Optional
+from typing import List, Optional,Any
 from pydantic import BaseModel, Field
 from datetime import datetime
 
@@ -24,8 +24,7 @@ class Team(BaseModel):
 
 class PlayerInjuries(BaseModel):
     injury_id: str = Field(default_factory=uuid.uuid4, alias='_id')
-    player_name: str = Field(...)
-    team_id:str = Field(...)
+    player_name: Optional[str] = Field(...)
     team_name: str = Field(...)
     injury_type: str = Field(...)
     start_date: datetime = Field(...)
@@ -49,7 +48,6 @@ class PlayerInjuries(BaseModel):
 class Awards(BaseModel):
     award_id: str = Field(default_factory=uuid.uuid4, alias='_id')
     recipient_type: str = Field(...)
-    recipient_id: str = Field(...)
     recipient_name: str = Field(...)
     award_name: str = Field(...)
     season: str = Field(...)
@@ -69,15 +67,14 @@ class Awards(BaseModel):
         }
 class Matches(BaseModel):
     match_id: str = Field(default_factory=uuid.uuid4, alias='_id')
-    home_team_id: str = Field(...)
     home_team_name: str = Field(...)
-    away_team_id: str = Field(...)
     away_team_name: str = Field(...)
     date: datetime = Field(...)
     status: str = Field(...) #score is a string
-    score: str = Field(...)
+    #score str not required but not a list
+    score: Optional[Any]
     officials: List[str]
-    statistics: List[str]
+    statistics: Optional[List[str]]
     class Config:
         allow_population_by_field_name = True
         schema_extra = {
@@ -92,11 +89,8 @@ class Matches(BaseModel):
             }
         }   
 class PlayerTransfers(BaseModel):
-    team_id: str = Field(...)
     team_name: str = Field(...)
-    player_id: str = Field(...)
     player_name: str = Field(...)
-    from_team_id: str = Field(...)
     from_team_name: str = Field(...)
     transfer_date: datetime = Field(...)
     fee: float = Field(...)
@@ -114,9 +108,11 @@ class PlayerTransfers(BaseModel):
             }
         }
 class PlayerValues(BaseModel):
-    player_id:str = Field(...)
     player_name: str = Field(...)
-    value_history: List[str]
+    value_history: List[int]
+    avgValue:Optional[float]
+    maxValue:Optional[float]
+    minValue:Optional[float]
     class Config:
         allow_population_by_field_name = True
         schema_extra = {

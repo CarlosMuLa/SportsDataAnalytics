@@ -1,15 +1,15 @@
 recipient_type,recipient_name,award_name,date_awarded,season,category
-"Player","Carlos Vela","Best Forward","2024-11-01","2023-2024","Individual"
-"Team","Club América","Championship Winner","2024-05-20","2023-2024","Team"
-"Coach","Miguel Herrera","Best Coach","2024-06-15","2023-2024","Individual"
-"Player","André-Pierre Gignac","Top Scorer","2024-04-30","2023-2024","Individual"
-"Team","Tigres UANL","Fair Play Award","2024-05-25","2023-2024","Team"
-"Player","Guillermo Ochoa","Best Goalkeeper","2024-03-22","2023-2024","Individual"
-"Team","Monterrey","Most Improved Team","2024-05-28","2023-2024","Team"
-"Player","Rodolfo Pizarro","Best Midfielder","2024-02-14","2023-2024","Individual"
-"Coach","Juan Reynoso","Coach of the Year","2024-06-10","2023-2024","Individual"
-"Player","Luis Romo","Rookie of the Year","2024-05-15","2023-2024","Individual"
-"Team","León","Best Defensive Team","2024-05-18","2023-2024","Team"
-"Player","José Juan Macías","Best Young Player","2024-07-01","2023-2024","Individual"
-"Team","Pachuca","Best Offensive Team","2024-05-12","2023-2024","Team"
-"Player","Jonathan Rodríguez","Most Valuable Player","2024-05-30","2023-2024","Individual"
+Player,Carlos Vela,Best Forward,2024-11-01,2023-2024,Individual
+Team,Club América,Championship Winner,2024-05-20,2023-2024,Team
+Coach,Miguel Herrera,Best Coach,2024-06-15,2023-2024,Individual
+Player,André-Pierre Gignac,Top Scorer,2024-04-30,2023-2024,Individual
+Team,Tigres UANL,Fair Play Award,2024-05-25,2023-2024,Team
+Player,Guillermo Ochoa,Best Goalkeeper,2024-03-22,2023-2024,Individual
+Team,Monterrey,Most Improved Team,2024-05-28,2023-2024,Team
+Player,Rodolfo Pizarro,Best Midfielder,2024-02-14,2023-2024,Individual
+Coach,Juan Reynoso,Coach of the Year,2024-06-10,2023-2024,Individual
+Player,Luis Romo,Rookie of the Year,2024-05-15,2023-2024,Individual
+Team,León,Best Defensive Team,2024-05-18,2023-2024,Team
+Player,José Juan Macías,Best Young Player,2024-07-01,2023-2024,Individual
+Team,Pachuca,Best Offensive Team,2024-05-12,2023-2024,Team
+Player,Jonathan Rodríguez,Most Valuable Player,2024-05-30,2023-2024,Individual

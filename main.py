@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#comand to run the app: python -m uvicorn main:app --reload
 import os
 
 from fastapi import FastAPI
@@ -16,7 +17,7 @@ def create_indexes():
         app.database.teams.drop_indexes()
         app.database.matches.drop_indexes()
         app.database.player_injuries.drop_indexes()
-        app.database.transfers.drop_indexes()
+        app.database.player_transfers.drop_indexes()
         app.database.awards.drop_indexes()
         app.database.player_values.drop_indexes()
     except Exception as e:
@@ -44,12 +45,12 @@ def create_indexes():
 
     # Transfers collection
     # Combine all text fields into a single text index
-    app.database.transfers.create_index([
+    app.database.player_transfers.create_index([
         ("player_name", TEXT),
         ("from_team_name", TEXT),
         ("team_name", TEXT)
     ], name="transfers_text_search")
-    app.database.transfers.create_index([("transfer_date", -1)])
+    app.database.player_transfers.create_index([("transfer_date", -1)])
 
     # Awards collection
     # Combine text fields into a single text index
@@ -62,25 +63,6 @@ def create_indexes():
     # Player values collection
     app.database.player_values.create_index([("player_name", TEXT)])
 
-def aggregations(player_name):
-    pipeline = [
-        {"$match": {"player_name": player_name}},
-        {"$project": {
-            "values": {
-                "$map": {
-                    "input": "$value_history",
-                    "as": "value",
-                    "in": {"$toDouble": "$$value"}  # Convert string values to numbers
-                }
-            }
-        }},
-        {"$project": {
-            "avgValue": {"$avg": "$values"},
-            "maxValue": {"$max": "$values"},
-            "minValue": {"$min": "$values"}
-        }}
-    ]
-    return list(app.database.player_values.aggregate(pipeline))
 
 
 @app.on_event("startup")
