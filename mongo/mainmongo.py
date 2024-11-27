@@ -6,10 +6,18 @@ import datetime
 MONGO_BASE_URL = "http://localhost:8000"
 
 
-functions = {"1": "Match History","2":"Player Injuries","3":"Teams",
-             "4": "Upcoming Matches","5":"Match Result","6":"Recent Matches for specific Team",
-             "7":"Past Matches for specific Team","8":"Player Tranfers", "9":"Awards by: ",
-             "10":"Player Value","11":"Match Officials", "12":"Exit"}
+functions = {"1": "Match History",
+             "2":"Player Injuries",
+             "3":"Teams",
+             "4": "Upcoming Matches",
+             "5":"Match Result",
+             "6":"Recent Matches for specific Team",
+             "7":"Past Matches for specific Team",
+             "8":"Player Tranfers",
+               "9":"Awards by: ",
+             "10":"Player Value",
+             "11":"Match Officials",
+               "12":"Exit"}
 
 
 def main():
@@ -55,11 +63,16 @@ def match_history():
     suffix = "/matches"
     endpoint = MONGO_BASE_URL + suffix
     response = requests.get(endpoint)
-    print(response.json())
     if response.ok:
+        print("="*50)
         json_data = response.json()
         for data in json_data:
-            print(data)
+            officials =",".join( data.get("officials",[]))
+            statistics = ",".join(data.get("statistics",[]))
+            print(f"Home team name: "+data.get("home_team_name")+" Away Team"+data.get("away_team_name")+" Date: "+data.get("date"))
+            print(f' Officials: {officials}')
+            print(f"Score: "+data.get("score"))
+            print(f' Statistics: {statistics}')
             print("="*50)
     else:
         print(f"Error: {response.status_code}")
@@ -73,7 +86,14 @@ def player_injuries(player):
     response = requests.get(endpoint, params=params)
     if response.ok:
         json_data = response.json()
-        print(json_data)
+        #print json keys
+        print(json_data.keys())
+        print("="*50)
+        print(f'Player Name: {json_data.get("player_name")} Injury: {json_data.get("injury_type")} Date: {json_data.get("start_date")}  End Date: {json_data.get("end_date")}')
+        print(f'Medical Notes: {json_data.get("medical_notes")}')
+        print(f'Status: {json_data.get("status")}')
+        print(f'Team Name: {json_data.get("team_name")}')
+        print("="*50)
     else:
         print(f"Error: {response.status_code}")
 
@@ -109,7 +129,13 @@ def getTeams():
     try:
         response = requests.get(endpoint)
         if response.ok:
-             print(response.json())
+             #imprimir el nombre de las keys
+            json_response = response.json()
+            for responses in range(len(json_response)):
+                print(f"Team name: "+str(json_response[responses].get("team_name")))
+                print(f"Email: "+json_response[responses].get("email"))
+                print(f"Owner: "+json_response[responses].get("owner"))
+                print("="*50)
         else:
             print(f"Error fetching matches: {response.status_code}")
             return None
@@ -130,7 +156,10 @@ def upcoming_matches():
     try:
         response = requests.get(endpoint, params=params)
         if response.ok:
-            print( response.json())
+            print("="*50)
+            for data in response.json():
+                print(data.get("home_team_name"),data.get("away_team_name"),data.get("date"))
+                print("="*50)
         else:
             print(f"Error fetching matches: {response.status_code}")
             return None
@@ -171,7 +200,10 @@ def recent_matches(team):
     try:
         response = requests.get(endpoint, params=params)
         if response.ok:
-            print(response.json())
+            print("="*50)
+            for data in response.json():
+                print(f"Home Team: "+data.get("home_team_name")+" Away Team: "+data.get("away_team_name")+" Date: "+data.get("date"))
+                print("="*50)
         else:
             print(f"Error fetching matches: {response.status_code}")
             return None
@@ -191,7 +223,10 @@ def past_matches(team):
     try:
         response = requests.get(endpoint, params=params)
         if response.ok:
-            print(response.json())
+            print("="*50)
+            for data in response.json():
+                print(f"Home Team: "+data.get("home_team_name")+" Away Team: "+data.get("away_team_name")+" Date: "+data.get("date"))
+                print("="*50)        
         else:
             print(f"Error fetching matches: {response.status_code}")
             return None
@@ -209,7 +244,13 @@ def player_transfers(player):
     try:
         response = requests.get(endpoint, params=params)
         if response.ok:
-            print(response.json())
+            response = response.json()
+
+            print("="*50)
+            for data in response:
+                print(f"Player Name: "+data.get("player_name")+" From: "+data.get("from_team_name")+" To: "+data.get("team_name")+" Date: "+data.get("transfer_date")+" Fee: "+str(data.get("fee")))
+                print(f"Contract Length: "+str(data.get("contract_length")))
+            print("="*50)
         else:
             print(f"Error fetching matches: {response.status_code}")
             return None
@@ -226,7 +267,11 @@ def awards(awarded):
     try:
         response = requests.get(endpoint, params=params)
         if response.ok:
-            print(response.json())
+            response = response.json()
+            print("="*50)
+            for data in response:
+                print(f"Recipient Name: "+data.get("recipient_name")+" Award Name: "+data.get("award_name")+" Season: "+data.get("season")+" Category: "+data.get("category")+" Date: "+data.get("date_awarded"))
+                print("="*50)
         else:
             print(f"Error fetching matches: {response.status_code}")
             return None
@@ -244,7 +289,11 @@ def player_value(player):
     try:
         response = requests.get(endpoint, params=params)
         if response.ok:
-            print(response.json())
+            json_response = response.json()
+            print("="*50)
+            for item in json_response:
+                    print(f"Player Name: {item.get('player_name')}, Value History: {item.get('value_history')}, Average Value: {item.get('avgValue')}, Max Value: {item.get('maxValue')}, Min Value: {item.get('minValue')}")
+            print("="*50)
         else:
             print(f"Error fetching matches: {response.status_code}")
             return None
@@ -253,8 +302,6 @@ def player_value(player):
         print(f"Request error: {e}")
         return None
 
-def match_officials():
-    pass
 
 if __name__ == "__main__":
     main()

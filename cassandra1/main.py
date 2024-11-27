@@ -5,7 +5,7 @@ import random
 
 from cassandra.cluster import Cluster
 
-import model
+import cmodel
 
 # Set logger
 log = logging.getLogger()
@@ -51,51 +51,51 @@ def main():
     cluster = Cluster(CLUSTER_IPS.split(','))
     session = cluster.connect()
 
-    model.create_keyspace(session, KEYSPACE, REPLICATION_FACTOR)
+    cmodel.create_keyspace(session, KEYSPACE, REPLICATION_FACTOR)
     session.set_keyspace(KEYSPACE)
 
-    model.delete_schema(session)
-    model.create_schema(session)
+    cmodel.delete_schema(session)
+    cmodel.create_schema(session)
 
 
     while(True):
         print_menu()
         option = int(input('Enter your choice: '))
         if option == 0:
-            model.bulk_insert(session)
+            cmodel.bulk_insert(session)
         if option == 1:
-            model.storedTeamData(session)
+            cmodel.storedTeamData(session)
         if option == 2:
-            model.displayRealTimeVisualization(session) 
+            cmodel.displayRealTimeVisualization(session) 
         if option == 3:
             pname = input("Please insert the Player name: ")
-            model.getPlayerHistory(session, pname)
+            cmodel.getPlayerHistory(session, pname)
         if option == 4:
             pname = input("Please insert the Team name: ")
-            model.getTeamHistory(session,pname)
+            cmodel.getTeamHistory(session,pname)
         if option == 5:
             c = int(input("Please insert the minimum capacity: "))
-            model.affitionStatus(session,c)
+            cmodel.affitionStatus(session,c)
         if option == 6:
             pname = input("Please insert the Team name: ")
-            model.getPlayersByTeam(session,pname)
+            cmodel.getPlayersByTeam(session,pname)
         if option == 7:
             r = int(input("Please insert the minimum rank: "))
-            model.getTeamRanking(session, r)
+            cmodel.getTeamRanking(session, r)
         if option == 8:
             b = int(input("Please insert the minimum budget: "))
-            model.manageTeamBudgets(session, b)
+            cmodel.manageTeamBudgets(session, b)
         if option == 9:
             pname1 = input("Please insert the Teams1 name: ")
             pname2 = input("Please insert the Teams2 name: ")
-            model.compareTeams(session, pname1, pname2)
+            cmodel.compareTeams(session, pname1, pname2)
         if option == 10:
-            model.getLeagueStandings(session)
+            cmodel.getLeagueStandings(session)
         if option == 11:
-            model.analyzeAttendanceTrends(session)
+            cmodel.analyzeAttendanceTrends(session)
         if option == 12:
             pname = input("Please insert the player name: ")
-            model.get_players_jersey_history(session, pname)
+            cmodel.get_players_jersey_history(session, pname)
         if option == 13:
             exit(0)
 

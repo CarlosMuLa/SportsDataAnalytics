@@ -1,6 +1,8 @@
 fastapi[all]
 pydantic
+pydgraph
 pymongo
 requests
 uvicorn
-
+cassandra-driver
+time_uuid

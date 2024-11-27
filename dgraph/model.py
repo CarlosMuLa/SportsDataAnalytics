@@ -1,9 +1,13 @@
-from pydgraph import DgraphClient, DgraphClientStub
+import os
 import csv
 import json
-
-
-# Definir el esquema de Dgraph
+from pydgraph import DgraphClient, DgraphClientStub, Operation
+ 
+ 
+def create_client():
+    stub = DgraphClientStub('localhost:9080')
+    return DgraphClient(stub)
+ 
 def set_schema(client):
     schema = """
     player_id: string @index(hash) .
@@ -20,57 +24,34 @@ def set_schema(client):
     originates: uid @reverse .
     includes: uid @reverse .
     belongs_to: uid @reverse .
-    country_stats: uid @reverse .
     """
-    op = client.txn().alter(pydgraph.Operation(schema=schema))
+    client.alter(Operation(schema=schema))
     print("Schema applied.")
-
-# Conectar al servidor Dgraph
-def create_client():
-    stub = DgraphClientStub('localhost:9080')  # Cambiar si el puerto es diferente
-    return DgraphClient(stub)
-
+ 
+ 
 def load_data(client, file_path, node_type):
+    if not os.path.exists(file_path):
+        print(f"File {file_path} not found. Skipping loading for {node_type}.")
+        return
     with open(file_path, 'r') as file:
         reader = csv.DictReader(file)
         mutations = []
         for row in reader:
             try:
+                row = {key: value.strip() for key, value in row.items()}
                 if node_type == 'Player':
                     mutations.append({
                         'uid': f'_:{row["player_id"]}',
                         'dgraph.type': 'Player',
                         'player_id': row['player_id'],
                         'name': row['name'],
-                        'age': int(row['age']),
+                        'age': int(row['age']),  
                         'country': row['country']
                     })
-                elif node_type == 'League':
-                    mutations.append({
-                        'uid': f'_:{row["league_id"]}',
-                        'dgraph.type': 'League',
-                        'league_id': row['league_id'],
-                        'name': row['name']
-                    })
-                elif node_type == 'Country':
-                    mutations.append({
-                        'uid': f'_:{row["country_id"]}',
-                        'dgraph.type': 'Country',
-                        'country_id': row['country_id'],
-                        'name': row['name']
-                    })
-                elif node_type == 'PlayerStats':
-                    mutations.append({
-                        'uid': f'_:{row["stats_id"]}',
-                        'dgraph.type': 'PlayerStats',
-                        'stats_id': row['stats_id'],
-                        'matches': int(row['matches']),
-                        'assists': int(row['assists']),
-                        'goals': int(row['goals'])
-                    })
+                
             except Exception as e:
                 print(f"Error processing row {row}: {e}")
-        
+ 
         txn = client.txn()
         try:
             txn.mutate(set_obj=mutations, commit_now=True)
@@ -79,8 +60,8 @@ def load_data(client, file_path, node_type):
             print(f"Error loading data for {node_type}: {e}")
         finally:
             txn.discard()
-
-
+ 
+ 
 def analyze_player_performance(client, player_id):
     query = f"""
     {{
@@ -100,7 +81,7 @@ def analyze_player_performance(client, player_id):
         print(json.loads(res.json))
     finally:
         txn.discard()
-
+ 
 def get_player_stats_by_league(client, league_id):
     query = f"""
     {{
@@ -123,7 +104,7 @@ def get_player_stats_by_league(client, league_id):
         print(json.loads(res.json))
     finally:
         txn.discard()
-
+ 
 def get_player_stats_by_country(client, country_id):
     query = f"""
     {{
@@ -146,7 +127,7 @@ def get_player_stats_by_country(client, country_id):
         print(json.loads(res.json))
     finally:
         txn.discard()
-
+ 
 def get_player_stats_by_age(client, age):
     query = f"""
     {{
@@ -167,7 +148,7 @@ def get_player_stats_by_age(client, age):
         print(json.loads(res.json))
     finally:
         txn.discard()
-
+ 
 def get_basic_player_stats(client, stats_id):
     query = f"""
     {{
@@ -185,7 +166,7 @@ def get_basic_player_stats(client, stats_id):
         print(json.loads(res.json))
     finally:
         txn.discard()
-
+ 
 def search_players(client, search_term):
     query = f"""
     {{
@@ -201,7 +182,7 @@ def search_players(client, search_term):
         print(json.loads(res.json))
     finally:
         txn.discard()
-
+ 
 def compare_players(client, player_id_1, player_id_2):
     query = f"""
     {{
@@ -235,7 +216,7 @@ def compare_players(client, player_id_1, player_id_2):
         print(json.loads(res.json))
     finally:
         txn.discard()
-
+ 
 def get_top_scorers(client):
     query = """
     {

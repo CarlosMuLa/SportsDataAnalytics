@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from model import analyze_player_performance, get_player_stats_by_league, get_player_stats_by_country, get_player_stats_by_age, get_basic_player_stats, search_players, compare_players, get_top_scorers, create_client, load_data, set_schema
 
 def display_menu():
@@ -18,10 +19,10 @@ def main():
     try:
         # Set the schema and load data
         set_schema(client)
-        load_data(client, 'players.csv', 'Player')
-        load_data(client, 'leagues.csv', 'League')
-        load_data(client, 'countries.csv', 'Country')
-        load_data(client, 'player_stats.csv', 'PlayerStats')
+        load_data(client, 'dgraph\players.csv', 'Player')
+        load_data(client, 'dgraph\league.csv', 'League')
+        load_data(client, 'dgraph\countries.csv', 'Country')
+        load_data(client, 'dgraph\playerstats.csv', 'PlayerStats')
 
         while True:
             display_menu()
