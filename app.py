@@ -2,7 +2,7 @@ import logging
 import os
 import cassandra1.cmodel
 from cassandra.cluster import Cluster
-from dgraph.model import analyze_player_performance, get_player_stats_by_league, get_player_stats_by_country, get_player_stats_by_age, get_basic_player_stats, search_players, compare_players, get_top_scorers, create_client, load_data, set_schema
+from dgraph.model import analyze_player_performance, get_player_stats_by_league, get_player_stats_by_country, get_player_stats_by_age, get_basic_player_stats, search_players, compare_players, get_top_scorers, create_client, set_schema
 from mongo.mainmongo import match_history, player_injuries, getTeams,upcoming_matches,match_result,recent_matches,past_matches,player_transfers,awards,player_value
 
 
@@ -146,19 +146,19 @@ def main():
             player = input("Enter the player name: ")
             player_value(player)
         elif choice == '22':
-            player_id = input("Enter the player ID: ")
+            player_id = input("Enter the player: ")
             analyze_player_performance(dgraph_client, player_id)
         elif choice == '23':
-            league_id = input("Enter the league ID: ")
+            league_id = input("Enter the league: ")
             get_player_stats_by_league(dgraph_client, league_id)
         elif choice == '24':
-            country_id = input("Enter the country ID: ")
+            country_id = input("Enter the country: ")
             get_player_stats_by_country(dgraph_client, country_id)
         elif choice == '25':
             age = int(input("Enter the minimum player age: "))
             get_player_stats_by_age(dgraph_client, age)
         elif choice == '26':
-            stats_id = input("Enter the player stats ID: ")
+            stats_id = input("Enter the player name for his stats: ")
             get_basic_player_stats(dgraph_client, stats_id)
         elif choice == '27':
             search_term = input("Enter the player's name to search: ")
