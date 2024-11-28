@@ -1,70 +1,56 @@
-# model.py
 import os
-import csv
 import json
 import pydgraph
-from pydgraph import DgraphClient, DgraphClientStub, Operation
+from pydgraph import DgraphClient, DgraphClientStub
 
 def create_client():
     stub = DgraphClientStub('localhost:9080')
     return DgraphClient(stub)
 
 def set_schema(client):
-    client.alter(pydgraph.Operation(drop_all=True))  # Limpia todo el esquema y los datos existentes.
-    
     schema = """
-# Definición de tipos
-type Country {
-    country_id: string
-    name: string
-    originates: [uid] 
-}
+        type Country {
+            country_id: string
+            name: string
+            originates: [uid]
+        }
 
-type League {
-    league_id: string
-    name: string
-    includes: [uid] 
-}
+        type League {
+            league_id: string
+            name: string
+            includes: [uid]
+        }
 
-type Player {
-    name: string
-    age: int
-    country: uid
-    plays_in: [uid] 
-    has_stats: [uid] 
-}
+        type Player {
+            name: string
+            age: int
+            country: uid
+            plays_in: uid
+            has_stats: uid
+        }
 
-type PlayerStats {
-    stats_id: string
-    matches: int
-    assists: int
-    goals: int
-    belongs_to: uid
-}
+        type PlayerStats {
+            stats_id: string
+            matches: int
+            assists: int
+            goals: int
+            belongs_to: uid
+        }
 
-# Definición de los índices fuera de los tipos
-country_id: string @index(hash) .
-stats_id: string @index(hash) .
-age: int @index(int) .
-league_id: string @index(hash) .
-
-# Relaciones y directivas @reverse
-country: uid @reverse .
-plays_in: uid @reverse .
-has_stats: uid @reverse .
-originates: uid @reverse .
-includes: uid @reverse .
-belongs_to: uid @reverse .
-
-matches: int  .
-assists: int  .
-goals: int .
-
-# Índice exacto en el campo `name` de Player
-name: string @index(exact) .
-"""
-    
-    # Aplica el esquema en el cliente de Dgraph
+        country_id: string @index(hash) .
+        league_id: string @index(hash) .
+        name: string @index(exact) .
+        age: int @index(int) .
+        matches: int .
+        assists: int .
+        goals: int .
+        country: uid @reverse .
+        plays_in: uid @reverse .
+        has_stats: uid @reverse .
+        originates: uid @reverse .
+        includes: uid @reverse .
+        belongs_to: uid @reverse .
+    """
     client.alter(pydgraph.Operation(schema=schema))
     print("Schema applied.")
 
@@ -72,178 +58,56 @@ def create_data(client):
     txn = client.txn()
     try:
         data = [
-            # Países
+            # Countries
+            {"uid": "_:France", "dgraph.type": "Country", "name": "France"},
+            {"uid": "_:Uruguay", "dgraph.type": "Country", "name": "Uruguay"},
+            {"uid": "_:Mexico", "dgraph.type": "Country", "name": "Mexico"},
+            {"uid": "_:Spain", "dgraph.type": "Country", "name": "Spain"},
+
+            # Leagues
+            {"uid": "_:LigaMX", "dgraph.type": "League", "name": "Liga MX"},
+
+            # Players
             {
-                'uid': '_:France',
-                'dgraph.type': 'Country',
-                'country_id': '1',
-                'name': 'France'
+                "uid": "_:Andre_Gignac",
+                "dgraph.type": "Player",
+                "name": "Andre Gignac",
+                "age": 37,
+                "country": {"uid": "_:France"},
+                "plays_in": {"uid": "_:LigaMX"},
+                "has_stats": {"uid": "_:Stats_Gignac"}
             },
             {
-                'uid': '_:Uruguay',
-                'dgraph.type': 'Country',
-                'country_id': '2',
-                'name': 'Uruguay'
-            },
-            {
-                'uid': '_:Mexico',
-                'dgraph.type': 'Country',
-                'country_id': '3',
-                'name': 'Mexico'
-            },
-            {
-                'uid': '_:España',
-                'dgraph.type': 'Country',
-                'country_id': '4',
-                'name': 'España'
-            },
-            {
-                'uid': '_:Paises_Bajos',
-                'dgraph.type': 'Country',
-                'country_id': '5',
-                'name': 'Paises Bajos'
-            },
-            {
-                'uid': '_:Chile',
-                'dgraph.type': 'Country',
-                'country_id': '6',
-                'name': 'Chile'
+                "uid": "_:Fernando_Gorriaran",
+                "dgraph.type": "Player",
+                "name": "Fernando Gorriaran",
+                "age": 29,
+                "country": {"uid": "_:Uruguay"},
+                "plays_in": {"uid": "_:LigaMX"},
+                "has_stats": {"uid": "_:Stats_Gorriaran"}
             },
 
-            # Ligas
+            # Player Stats
             {
-                'uid': '_:ligaMX',
-                'dgraph.type': 'League',
-                'league_id': '1',
-                'name': 'ligaMX'
-            },
-
-            # Jugadores
-            {
-                'uid': '_:Andre_Gignac',
-                'dgraph.type': 'Player',
-                'name': 'Andre Gignac',
-                'age': 37,
-                'country': {'uid': '_:France'},
-                'plays_in': [{'uid': '_:ligaMX'}]
+                "uid": "_:Stats_Gignac",
+                "dgraph.type": "PlayerStats",
+                "matches": 100,
+                "assists": 50,
+                "goals": 80,
+                "belongs_to": {"uid": "_:Andre_Gignac"}
             },
             {
-                'uid': '_:Fernando_Gorriaran',
-                'dgraph.type': 'Player',
-                'name': 'Fernando Gorriaran',
-                'age': 29,
-                'country': {'uid': '_:Uruguay'},
-                'plays_in': [{'uid': '_:ligaMX'}]
-            },
-            {
-                'uid': '_:Alan_Mozo',
-                'dgraph.type': 'Player',
-                'name': 'Alan Mozo',
-                'age': 28,
-                'country': {'uid': '_:Mexico'},
-                'plays_in': [{'uid': '_:ligaMX'}]
-            },
-            {
-                'uid': '_:Alvaro_Fidalgo',
-                'dgraph.type': 'Player',
-                'name': 'Alvaro Fidalgo',
-                'age': 30,
-                'country': {'uid': '_:España'},
-                'plays_in': [{'uid': '_:ligaMX'}]
-            },
-            {
-                'uid': '_:Jaivaro_Dilrosun',
-                'dgraph.type': 'Player',
-                'name': 'Jaivaro Dilrosun',
-                'age': 18,
-                'country': {'uid': '_:Paises_Bajos'},
-                'plays_in': [{'uid': '_:ligaMX'}]
-            },
-            {
-                'uid': '_:Diego_Valdez',
-                'dgraph.type': 'Player',
-                'name': 'Diego Valdez',
-                'age': 28,
-                'country': {'uid': '_:Chile'},
-                'plays_in': [{'uid': '_:ligaMX'}]
-            },
-
-            # Estadísticas de Jugadores
-            {
-                'uid': '_:stats1',
-                'dgraph.type': 'PlayerStats',
-                'stats_id': '1',
-                'matches': 100,
-                'assists': 50,
-                'goals': 80,
-                'has_stats': {'uid': '_:Andre_Gignac'}
-            },
-            {
-                'uid': '_:stats2',
-                'dgraph.type': 'PlayerStats',
-                'stats_id': '2',
-                'matches': 150,
-                'assists': 40,
-                'goals': 120,
-                'has_stats': {'uid': '_:Fernando_Gorriaran'}
-            },
-            {
-                'uid': '_:stats3',
-                'dgraph.type': 'PlayerStats',
-                'stats_id': '3',
-                'matches': 120,
-                'assists': 30,
-                'goals': 14,
-                'has_stats': {'uid': '_:Alan_Mozo'}
-            },
-            {
-                'uid': '_:stats4',
-                'dgraph.type': 'PlayerStats',
-                'stats_id': '4',
-                'matches': 200,
-                'assists': 40,
-                'goals': 50,
-                'has_stats': {'uid': '_:Alvaro_Fidalgo'}
-            },
-            {
-                'uid': '_:stats5',
-                'dgraph.type': 'PlayerStats',
-                'stats_id': '5',
-                'matches': 50,
-                'assists': 11,
-                'goals': 9,
-                'has_stats': {'uid': '_:Jaivaro_Dilrosun'}
-            },
-            {
-                'uid': '_:stats6',
-                'dgraph.type': 'PlayerStats',
-                'stats_id': '6',
-                'matches': 111,
-                'assists': 88,
-                'goals': 10,
-                'has_stats': {'uid': '_:Diego_Valdez'}
+                "uid": "_:Stats_Gorriaran",
+                "dgraph.type": "PlayerStats",
+                "matches": 150,
+                "assists": 40,
+                "goals": 120,
+                "belongs_to": {"uid": "_:Fernando_Gorriaran"}
             }
         ]
-        
         txn.mutate(set_obj=data)
         txn.commit()
-    finally:
-        txn.discard()
-
-def verify_data(client):
-    query = """
-    {
-        allPlayers(func: has(player_id)) {
-            player_id
-            name
-        }
-    }
-    """
-    txn = client.txn(read_only=True)
-    try:
-        res = txn.query(query)
-        print("Players in the database:")
-        print(json.loads(res.json))
+        print("Data loaded successfully.")
     finally:
         txn.discard()
 
@@ -264,23 +128,23 @@ def analyze_player_performance(client, player_name):
     try:
         res = txn.query(query)
         data = json.loads(res.json)
-        if "player" in data and len(data["player"]) > 0:
+        if data["player"]:
             player_data = data["player"][0]
-            print(f"\nPlayer Performance Data for {player_name}:")
-            print(f"Name: {player_data['name']}")
+            print(f"Player: {player_data['name']}")
             stats = player_data.get("has_stats", [])
             if stats:
                 print(f"Matches: {stats[0].get('matches', 'N/A')}")
                 print(f"Assists: {stats[0].get('assists', 'N/A')}")
                 print(f"Goals: {stats[0].get('goals', 'N/A')}")
             else:
-                print("No stats found.")
+                print("No stats available.")
         else:
-            print(f"\nNo data found for player: {player_name}")
+            print("Player not found.")
     except Exception as e:
-        print(f"\nError while querying player performance: {e}")
+        print(f"Error: {e}")
     finally:
         txn.discard()
+
 def get_player_stats_by_league(client, league_name):
     query = f"""
     {{
@@ -300,21 +164,20 @@ def get_player_stats_by_league(client, league_name):
     txn = client.txn(read_only=True)
     try:
         res = txn.query(query)
-        print(f"\nPlayers in the {league_name} League:")
         data = json.loads(res.json)
-        if "league" in data and len(data["league"]) > 0:
-            players = data["league"][0].get("includes", [])
-            for player in players:
-                print(f"Name: {player['name']}")
-                stats = player.get("has_stats", [])
-                if stats:
-                    print(f"  Matches: {stats[0].get('matches', 'N/A')}")
-                    print(f"  Assists: {stats[0].get('assists', 'N/A')}")
-                    print(f"  Goals: {stats[0].get('goals', 'N/A')}")
+        if data["league"]:
+            league = data["league"][0]
+            print(f"League: {league['name']}")
+            for player in league.get("includes", []):
+                print(f"Player: {player['name']}")
+                stats = player.get("has_stats", {})
+                print(f"Matches: {stats.get('matches', 'N/A')}")
+                print(f"Assists: {stats.get('assists', 'N/A')}")
+                print(f"Goals: {stats.get('goals', 'N/A')}")
         else:
-            print(f"No players found for league: {league_name}")
+            print("League not found.")
     except Exception as e:
-        print(f"Error while querying league: {e}")
+        print(f"Error: {e}")
     finally:
         txn.discard()
 
@@ -323,7 +186,7 @@ def get_player_stats_by_country(client, country_name):
     {{
         players(func: has(name)) @filter(eq(country.name, "{country_name}")) {{
             name
-            has_stats {{
+            stats {{
                 matches
                 assists
                 goals
@@ -334,24 +197,23 @@ def get_player_stats_by_country(client, country_name):
     txn = client.txn(read_only=True)
     try:
         res = txn.query(query)
-        data = json.loads(res.json())
-        if data['players']:
+        data = json.loads(res.json)
+        if "players" in data and len(data["players"]) > 0:
             print(f"\nPlayers from {country_name}:")
-            for player in data['players']:
+            for player in data["players"]:
                 print(f"Name: {player['name']}")
-                stats = player.get("has_stats", [])
+                stats = player.get("stats", [])
                 if stats:
                     print(f"Matches: {stats[0].get('matches', 'N/A')}")
                     print(f"Assists: {stats[0].get('assists', 'N/A')}")
                     print(f"Goals: {stats[0].get('goals', 'N/A')}")
-                else:
-                    print("No stats found.")
         else:
             print(f"\nNo players found from {country_name}.")
     except Exception as e:
         print(f"\nError while querying player stats by country: {e}")
     finally:
         txn.discard()
+
 
 def get_player_stats_by_age(client, min_age):
     query = f"""
