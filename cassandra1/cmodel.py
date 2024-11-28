@@ -93,12 +93,13 @@ CREATE_AFITION_STATUS = """
     CREATE TABLE IF NOT EXISTS afition_status (
         stadium_id DECIMAL,
         name TEXT,  
+        country TEXT,  
         capacity DECIMAL,
         average_assistance DECIMAL,
         areas LIST<TEXT>,
         next_match TIMESTAMP,
-        PRIMARY KEY ((stadium_id),capacity)
-    )
+        PRIMARY KEY ((country), capacity)
+    ) WITH CLUSTERING ORDER BY (capacity DESC)
 """ 
 
 #6
@@ -125,8 +126,21 @@ CREATE_TEAM_RANKING = """
         total_goals DECIMAL,
         gender TEXT,
         ranking DECIMAL,
-        PRIMARY KEY ((ranking), name)
-    ) WITH CLUSTERING ORDER BY (name ASC)
+        PRIMARY KEY ((country), ranking)
+    ) WITH CLUSTERING ORDER BY (ranking DESC)
+""" 
+
+CREATE_AFITION_STATUS = """
+    CREATE TABLE IF NOT EXISTS afition_status (
+        stadium_id DECIMAL,
+        name TEXT,  
+        country TEXT,  
+        capacity DECIMAL,
+        average_assistance DECIMAL,
+        areas LIST<TEXT>,
+        next_match TIMESTAMP,
+        PRIMARY KEY ((country), capacity)
+    ) WITH CLUSTERING ORDER BY (capacity DESC)
 """ 
 
 #8
@@ -134,11 +148,12 @@ CREATE_TEAM_BUDGETS = """
     CREATE TABLE IF NOT EXISTS team_budgets (
         team_id DECIMAL,
         name TEXT,
+        country TEXT,
         manager TEXT,
         budget_allocated DECIMAL,
         budget_spent DECIMAL,
-        PRIMARY KEY ((budget_allocated), budget_spent)
-    ) WITH CLUSTERING ORDER BY (budget_spent ASC)
+        PRIMARY KEY ((country), budget_allocated)
+    ) WITH CLUSTERING ORDER BY (budget_allocated DESC)
 
 """ 
 
@@ -176,12 +191,13 @@ CREATE_STADIUM_ATTENDANCE_TRENDS = """
     CREATE TABLE IF NOT EXISTS analyze_attendance_trends (
         stadium_id DECIMAL,
         name TEXT,  
+        country TEXT,  
         capacity DECIMAL,
         average_assistance DECIMAL,
         areas LIST<TEXT>,
         next_match TIMESTAMP,
-        PRIMARY KEY ((stadium_id), average_assistance)
-    ) WITH CLUSTERING ORDER BY (average_assistance ASC)
+        PRIMARY KEY ((country), average_assistance)
+    ) WITH CLUSTERING ORDER BY (average_assistance DESC)
 """
 
 #12
@@ -281,10 +297,9 @@ SELECT_TEAM_HISTORY = """
 """
 #5
 SELECT_AFITION_STATUS = """
-    SELECT name, capacity, average_assistance, areas, next_match
+    SELECT name, country, capacity, average_assistance, areas, next_match
     FROM afition_status
-    WHERE capacity >= ?
-    ALLOW FILTERING  
+    WHERE country = ? AND capacity >= ?
 """
 
 #6
@@ -297,17 +312,15 @@ SELECT_PLAYERS_BY_TEAM = """
 SELECT_TEAM_RANKING = """
     SELECT name, country,total_wins, total_losses, total_goals, gender, ranking
     FROM team_ranking
-    WHERE ranking > ?
-    ALLOW FILTERING  
+    WHERE country = ? AND ranking >= ? 
 """
 
 
 #8
 SELECT_TEAM_BUDGETS = """
-    SELECT name, manager, budget_allocated, budget_spent
+    SELECT name, country, manager, budget_allocated, budget_spent
     FROM team_budgets
-    WHERE budget_allocated >= ?
-    ALLOW FILTERING  
+    WHERE country = ? AND budget_allocated >= ? 
 """
 #9
 SELECT_COMPARE_TEAMS = """
@@ -322,8 +335,9 @@ SELECT_LEAGUE_STANDING = """
 """
 #11
 SELECT_STADIUM_ATTENDANCE_TRENDS = """
-    SELECT name, capacity, average_assistance, areas, next_match
+    SELECT name, country, capacity, average_assistance, areas, next_match
     FROM analyze_attendance_trends
+    WHERE country = ? AND average_assistance >= ?
 """
 #12
 SELECT_PLAYER_JERSEY_HISTORY = """
@@ -363,11 +377,11 @@ def bulk_insert(session):
     session.execute("INSERT INTO team_history (team_id,name,manager,country,players,total_wins,total_losses,total_goals,last_match,next_match,gender,ranking,budget_allocated,budget_spent) VALUES (5, 'Atlas', 'Beñat San Jose', 'Mexico', ['Jose Hernandez', 'Camilo Vargas', 'Antonio Sanchez', 'Martin Nervo', 'Idekel Dominguez', 'Adrian Mora', 'Gaddi Aguirre', 'Luis Reyes', 'Jose Rivaldo Lozano', 'Carlos Robles', 'Matheus Doria'], 12, 12, 36, '2024-11-22', '2024-11-28', 'Male', 6, 1800000, 1400000)")
 
     #5
-    session.execute("INSERT INTO afition_status (stadium_id, name, capacity, average_assistance, areas, next_match) VALUES (1, 'Estadio Azteca', 87000, 65000, ['VIP', 'General', 'Palcos'], '2024-11-26 20:00')")
-    session.execute("INSERT INTO afition_status (stadium_id, name, capacity, average_assistance, areas, next_match) VALUES (2, 'Old Trafford', 75000, 72000, ['VIP', 'Family', 'East Stand'], '2024-11-28 18:30')")
-    session.execute("INSERT INTO afition_status (stadium_id, name, capacity, average_assistance, areas, next_match) VALUES (3, 'Camp Nou', 99354, 85000, ['General', 'VIP', 'Corporate Boxes'], '2024-11-25 21:00')")
-    session.execute("INSERT INTO afition_status (stadium_id, name, capacity, average_assistance, areas, next_match) VALUES (4, 'De Kuip', 51000, 45000, ['VIP', 'General'], '2024-11-29 19:00')")
-    session.execute("INSERT INTO afition_status (stadium_id, name, capacity, average_assistance, areas, next_match) VALUES (5, 'Estadio Jalisco', 55000, 40000, ['VIP', 'General'], '2024-11-27 20:30')")
+    session.execute("INSERT INTO afition_status (stadium_id, name, country, capacity, average_assistance, areas, next_match) VALUES (1, 'Estadio Azteca', 'Mexico', 87000, 65000, ['VIP', 'General', 'Palcos'], '2024-11-26 20:00')")
+    session.execute("INSERT INTO afition_status (stadium_id, name, country, capacity, average_assistance, areas, next_match) VALUES (2, 'Old Trafford', 'England', 75000, 72000, ['VIP', 'Family', 'East Stand'], '2024-11-28 18:30')")
+    session.execute("INSERT INTO afition_status (stadium_id, name, country, capacity, average_assistance, areas, next_match) VALUES (3, 'Camp Nou', 'Spain', 99354, 85000, ['General', 'VIP', 'Corporate Boxes'], '2024-11-25 21:00')")
+    session.execute("INSERT INTO afition_status (stadium_id, name, country, capacity, average_assistance, areas, next_match) VALUES (4, 'De Kuip', 'Netherlands', 51000, 45000, ['VIP', 'General'], '2024-11-29 19:00')")
+    session.execute("INSERT INTO afition_status (stadium_id, name, country, capacity, average_assistance, areas, next_match) VALUES (5, 'Estadio Jalisco', 'Mexico', 55000, 40000, ['VIP', 'General'], '2024-11-27 20:30')")
 
     #6
     session.execute("INSERT INTO players_by_team (team_id, name, manager, country, players, gender) VALUES (1, 'Cruz Azul', 'Martin Anselmi', 'Mexico', ['Andres Gudiño', 'Luis Jimenez', 'Kevin Mier', 'Jorge Sanchez', 'Willer Ditta', 'Camilo Candido', 'Raymundo Rubio', 'Carlos Vargas', 'Gonzalo Piovi', 'Jose Suarez', 'Jorge Garcia'], 'Male')")
@@ -384,11 +398,11 @@ def bulk_insert(session):
     session.execute("INSERT INTO team_ranking (team_id, name, country, total_wins, total_losses, total_goals, gender, ranking) VALUES (5, 'Atlas', 'Mexico', 12, 12, 36, 'Male', 6)")
 
     #8
-    session.execute("INSERT INTO team_budgets (team_id, name, manager, budget_allocated, budget_spent) VALUES (1, 'Cruz Azul', 'Martin Anselmi', 2000000, 1500000)")
-    session.execute("INSERT INTO team_budgets (team_id, name, manager, budget_allocated, budget_spent) VALUES (2, 'Manchester United', 'Ruben Amorim', 5000000, 4500000)")
-    session.execute("INSERT INTO team_budgets (team_id, name, manager, budget_allocated, budget_spent) VALUES (3, 'Barcelona', 'Pere Romeu', 8000000, 7500000)")
-    session.execute("INSERT INTO team_budgets (team_id, name, manager, budget_allocated, budget_spent) VALUES (4, 'Feyenoord Vrouwen', 'Jessica Torny', 3000000, 2500000)")
-    session.execute("INSERT INTO team_budgets (team_id, name, manager, budget_allocated, budget_spent) VALUES (5, 'Atlas', 'Beñat San Jose', 1800000, 1400000)")
+    session.execute("INSERT INTO team_budgets (team_id, name, country, manager, budget_allocated, budget_spent) VALUES (1, 'Cruz Azul', 'Mexico','Martin Anselmi', 2000000, 1500000)")
+    session.execute("INSERT INTO team_budgets (team_id, name, country, manager, budget_allocated, budget_spent) VALUES (2, 'Manchester United', 'England','Ruben Amorim', 5000000, 4500000)")
+    session.execute("INSERT INTO team_budgets (team_id, name, country, manager, budget_allocated, budget_spent) VALUES (3, 'Barcelona', 'Spain','Pere Romeu', 8000000, 7500000)")
+    session.execute("INSERT INTO team_budgets (team_id, name, country, manager, budget_allocated, budget_spent) VALUES (4, 'Feyenoord Vrouwen', 'Netherlands','Jessica Torny', 3000000, 2500000)")
+    session.execute("INSERT INTO team_budgets (team_id, name, country, manager, budget_allocated, budget_spent) VALUES (5, 'Atlas', 'Mexico', 'Beñat San Jose', 1800000, 1400000)")
 
 
     #9
@@ -408,11 +422,11 @@ def bulk_insert(session):
 
 
     #11
-    session.execute("INSERT INTO analyze_attendance_trends (stadium_id, name, capacity, average_assistance, areas, next_match) VALUES (1, 'Estadio Azteca', 87000, 65000, ['VIP', 'General', 'Palcos'], '2024-11-26 20:00')")
-    session.execute("INSERT INTO analyze_attendance_trends (stadium_id, name, capacity, average_assistance, areas, next_match) VALUES (2, 'Old Trafford', 75000, 72000, ['VIP', 'Family', 'East Stand'], '2024-11-28 18:30')")
-    session.execute("INSERT INTO analyze_attendance_trends (stadium_id, name, capacity, average_assistance, areas, next_match) VALUES (3, 'Camp Nou', 99354, 85000, ['General', 'VIP', 'Corporate Boxes'], '2024-11-25 21:00')")
-    session.execute("INSERT INTO analyze_attendance_trends (stadium_id, name, capacity, average_assistance, areas, next_match) VALUES (4, 'De Kuip', 51000, 45000, ['VIP', 'General'], '2024-11-29 19:00')")
-    session.execute("INSERT INTO analyze_attendance_trends (stadium_id, name, capacity, average_assistance, areas, next_match) VALUES (5, 'Estadio Jalisco', 55000, 40000, ['VIP', 'General'], '2024-11-27 20:30')")
+    session.execute("INSERT INTO analyze_attendance_trends (stadium_id, name, country, capacity, average_assistance, areas, next_match) VALUES (1, 'Estadio Azteca', 'Mexico', 87000, 65000, ['VIP', 'General', 'Palcos'], '2024-11-26 20:00')")
+    session.execute("INSERT INTO analyze_attendance_trends (stadium_id, name, country, capacity, average_assistance, areas, next_match) VALUES (2, 'Old Trafford', 'England',75000, 72000, ['VIP', 'Family', 'East Stand'], '2024-11-28 18:30')")
+    session.execute("INSERT INTO analyze_attendance_trends (stadium_id, name, country, capacity, average_assistance, areas, next_match) VALUES (3, 'Camp Nou', 'Spain', 99354, 85000, ['General', 'VIP', 'Corporate Boxes'], '2024-11-25 21:00')")
+    session.execute("INSERT INTO analyze_attendance_trends (stadium_id, name, country, capacity, average_assistance, areas, next_match) VALUES (4, 'De Kuip', 'Netherlands', 51000, 45000, ['VIP', 'General'], '2024-11-29 19:00')")
+    session.execute("INSERT INTO analyze_attendance_trends (stadium_id, name, country, capacity, average_assistance, areas, next_match) VALUES (5, 'Estadio Jalisco', 'Mexico', 55000, 40000, ['VIP', 'General'], '2024-11-27 20:30')")
 
     #12
     session.execute("INSERT INTO player_jersey_history (player_id, name, jersey_num) VALUES (1, 'Lionel Messi', [10, 30])")  
@@ -530,13 +544,14 @@ def getTeamHistory(session, n):
         print(f"- Budget Spent: {row.budget_spent}")
 
 #5
-def affitionStatus(session, c):
+def affitionStatus(session, c,ca):
     log.info(f"Retrieving stadiums capacity")
     
     query = session.prepare(SELECT_AFITION_STATUS)
-    rows = session.execute(query, [c])
+    rows = session.execute(query, [c, ca])
     for row in rows:
         print(f"=== Stadium: {row.name} ===")
+        print(f"- Country: {row.country}")
         print(f"- Capacity: {row.capacity}")
         print(f"- Average Assistance: {row.average_assistance}")
         print(f"- Areas: {row.areas}")
@@ -557,11 +572,11 @@ def getPlayersByTeam(session, n):
      
 
 #7
-def getTeamRanking(session, r):
+def getTeamRanking(session, cn,r):
     log.info(f"Retrieving teams")
     
     query = session.prepare(SELECT_TEAM_RANKING)
-    rows = session.execute(query, [r])
+    rows = session.execute(query, [cn, r])
     for row in rows:
         print(f"=== Team: {row.name} ===")
         print(f"- Country: {row.country}")
@@ -573,13 +588,14 @@ def getTeamRanking(session, r):
     
 
 #8
-def manageTeamBudgets(session, b):
+def manageTeamBudgets(session, c,ba):
     log.info(f"Retrieving budgets")
     
     query = session.prepare(SELECT_TEAM_BUDGETS)
-    rows = session.execute(query, [b])
+    rows = session.execute(query, [c,ba])
     for row in rows:
         print(f"=== Team: {row.name} ===")
+        print(f"- Country: {row.country}")
         print(f"- Manager: {row.manager}")
         print(f"- Budget Allocated: {row.budget_allocated}")
         print(f"- Budget Spent: {row.budget_spent}")
@@ -617,13 +633,14 @@ def getLeagueStandings(session):
 
 #Querys function
 #11
-def analyzeAttendanceTrends(session):
+def analyzeAttendanceTrends(session, c,ac):
     log.info(f"Retrieving stadiums capacity")
     
     query = session.prepare(SELECT_STADIUM_ATTENDANCE_TRENDS)
-    rows = session.execute(query)
+    rows = session.execute(query, [c,ac])
     for row in rows:
         print(f"=== Stadium: {row.name} ===")
+        print(f"- Country: {row.country}")
         print(f"- Capacity: {row.capacity}")
         print(f"- Average Assistance: {row.average_assistance}")
         print(f"- Areas: {row.areas}")

@@ -5,18 +5,18 @@ import random
 
 from cassandra.cluster import Cluster
 
-import cmodel
+import model
 
 # Set logger
 log = logging.getLogger()
 log.setLevel('INFO')
-handler = logging.FileHandler('investments.log')
+handler = logging.FileHandler('leaguedata.log')
 handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
 log.addHandler(handler)
 
 # Read env vars releated to Cassandra App
 CLUSTER_IPS = os.getenv('CASSANDRA_CLUSTER_IPS', 'localhost')
-KEYSPACE = os.getenv('CASSANDRA_KEYSPACE', 'investments')
+KEYSPACE = os.getenv('CASSANDRA_KEYSPACE', 'leaguedata')
 REPLICATION_FACTOR = os.getenv('CASSANDRA_REPLICATION_FACTOR', '1')
 
 
@@ -51,51 +51,56 @@ def main():
     cluster = Cluster(CLUSTER_IPS.split(','))
     session = cluster.connect()
 
-    cmodel.create_keyspace(session, KEYSPACE, REPLICATION_FACTOR)
+    model.create_keyspace(session, KEYSPACE, REPLICATION_FACTOR)
     session.set_keyspace(KEYSPACE)
 
-    cmodel.delete_schema(session)
-    cmodel.create_schema(session)
+    model.delete_schema(session)
+    model.create_schema(session)
 
 
     while(True):
         print_menu()
         option = int(input('Enter your choice: '))
         if option == 0:
-            cmodel.bulk_insert(session)
+            model.bulk_insert(session)
         if option == 1:
-            cmodel.storedTeamData(session)
+            model.storedTeamData(session)
         if option == 2:
-            cmodel.displayRealTimeVisualization(session) 
+            model.displayRealTimeVisualization(session) 
         if option == 3:
             pname = input("Please insert the Player name: ")
-            cmodel.getPlayerHistory(session, pname)
+            model.getPlayerHistory(session, pname)
         if option == 4:
             pname = input("Please insert the Team name: ")
-            cmodel.getTeamHistory(session,pname)
+            model.getTeamHistory(session,pname)
         if option == 5:
-            c = int(input("Please insert the minimum capacity: "))
-            cmodel.affitionStatus(session,c)
+            cn = input("Please insert the Country name: ")
+            ca = int(input("Please insert the minimum capacity: "))
+            model.affitionStatus(session, cn, ca)
         if option == 6:
             pname = input("Please insert the Team name: ")
-            cmodel.getPlayersByTeam(session,pname)
+            model.getPlayersByTeam(session,pname)
         if option == 7:
+            cn = input("Please insert the Country name: ")
             r = int(input("Please insert the minimum rank: "))
-            cmodel.getTeamRanking(session, r)
+            model.getTeamRanking(session, cn, r)
         if option == 8:
-            b = int(input("Please insert the minimum budget: "))
-            cmodel.manageTeamBudgets(session, b)
+            c = input("Please insert the Country name: ")
+            ba = int(input("Please insert the minimum budget allocated: "))
+            model.manageTeamBudgets(session, c, ba)
         if option == 9:
             pname1 = input("Please insert the Teams1 name: ")
             pname2 = input("Please insert the Teams2 name: ")
-            cmodel.compareTeams(session, pname1, pname2)
+            model.compareTeams(session, pname1, pname2)
         if option == 10:
-            cmodel.getLeagueStandings(session)
+            model.getLeagueStandings(session)
         if option == 11:
-            cmodel.analyzeAttendanceTrends(session)
+            c = input("Please insert the Country name: ")
+            av = int(input("Please insert the minimum of the avergae assistance: "))
+            model.analyzeAttendanceTrends(session, c, av)
         if option == 12:
             pname = input("Please insert the player name: ")
-            cmodel.get_players_jersey_history(session, pname)
+            model.get_players_jersey_history(session, pname)
         if option == 13:
             exit(0)
 

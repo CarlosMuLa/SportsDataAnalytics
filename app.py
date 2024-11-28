@@ -99,17 +99,20 @@ def main():
             pname = input("Please insert the Team name: ")
             cassandra1.cmodel.getTeamHistory(session,pname)
         elif choice == '5':
-            c = int(input("Please insert the minimum capacity: "))
-            cassandra1.cmodel.affitionStatus(session,c)
+            cn = input("Please insert the Country name: ")
+            ca = int(input("Please insert the minimum capacity: "))
+            cassandra1.cmodel.affitionStatus(session,cn,ca)
         elif choice == '6':
             team = input("Enter the team name: ")
             cassandra1.cmodel.getPlayersByTeam(session, team)
         elif choice == '7':
+            cn = input("Please insert the Country name: ")
             r = int(input("Please insert the minimum rank: "))
-            cassandra1.cmodel.getTeamRanking(session,r)
+            cassandra1.cmodel.getTeamRanking(session,cn,r)
         elif choice == '8':
-            b = int(input("Please insert the minimum budget: ")) 
-            cassandra1.cmodel.manageTeamBudgets(session,b)
+            c = input("Please insert the Country name: ")
+            ba = int(input("Please insert the minimum budget allocated: "))
+            cassandra1.cmodel.manageTeamBudgets(session,c,ba)
         elif choice == '9':
             pname1 = input("Please insert the Teams1 name: ")
             pname2 = input("Please insert the Teams2 name: ")
@@ -117,7 +120,9 @@ def main():
         elif choice == '10':
             cassandra1.cmodel.getLeagueStandings(session)
         elif choice == '11':
-            cassandra1.cmodel.analyzeAttendanceTrends(session)
+            c = input("Please insert the Country name: ")
+            av = int(input("Please insert the minimum of the avergae assistance: "))
+            cassandra1.cmodel.analyzeAttendanceTrends(session, c, av)
         elif choice == '12':
             pname = input("Please insert the player name: ")
             cassandra1.cmodel.get_players_jersey_history(session,pname)
