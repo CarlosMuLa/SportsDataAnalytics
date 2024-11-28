@@ -131,13 +131,17 @@ def analyze_player_performance(client, player_name):
         res = txn.query(query)
         data = json.loads(res.json)
         if data["player"]:
+            #print(data)
+            #print("hola"+str(data["player"]))
             player_data = data["player"][0]
-            print(f"Player: {player_data['name']}")
-            stats = player_data.get("has_stats", [])
-            if stats:
-                print(f"Matches: {stats[0].get('matches', 'N/A')}")
-                print(f"Assists: {stats[0].get('assists', 'N/A')}")
-                print(f"Goals: {stats[0].get('goals', 'N/A')}")
+            player_stats = data["player"][1]
+            #print type of player_stats
+            has_stats = player_stats.get("has_stats", [])
+           # print(player_data)
+            if player_stats:
+                print(f"Matches: {has_stats.get('matches', 'N/A')}")
+                print(f"Assists: {has_stats.get('assists', 'N/A')}")
+                print(f"Goals: {has_stats.get('goals', 'N/A')}")
             else:
                 print("No stats available.")
         else:
