@@ -3,7 +3,7 @@ import logging
 import os
 import cassandra1.cmodel
 from cassandra.cluster import Cluster
-from dgraph.model import analyze_player_performance, get_player_stats_by_league, get_player_stats_by_country, get_player_stats_by_age, get_basic_player_stats, search_players, compare_players, get_top_scorers, create_client, set_schema
+from dgraph.model import analyze_player_performance, create_data, get_player_stats_by_league, get_player_stats_by_country, get_player_stats_by_age, get_basic_player_stats, search_players, compare_players, get_top_scorers, create_client, set_schema
 from mongo.mainmongo import match_history, player_injuries, getTeams,upcoming_matches,match_result,recent_matches,past_matches,player_transfers,awards,player_value
 
 
@@ -71,12 +71,12 @@ cassandra1.cmodel.bulk_insert(session)
 MONGO_BASE_URL = "http://localhost:8000"
 
 #------------ Dgraph set up ------------
+
 dgraph_client = create_client()
 set_schema(dgraph_client)
-load_data(dgraph_client, 'dgraph\players.csv', 'Player')
-load_data(dgraph_client, 'dgraph\league.csv', 'League')
-load_data(dgraph_client, 'dgraph\countries.csv', 'Country')
-load_data(dgraph_client, 'dgraph\playerstats.csv', 'PlayerStats')
+def load_data(client):
+    create_data(client)  
+    print("Data loaded into the database.")
 
 
 
