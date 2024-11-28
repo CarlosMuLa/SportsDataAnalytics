@@ -63,7 +63,7 @@ session = cluster.connect()
 cassandra1.cmodel.create_keyspace(session, KEYSPACE, REPLICATION_FACTOR)
 session.set_keyspace(KEYSPACE)
 
-cassandra1.cmodel.delete_schema(session)
+#cassandra1.cmodel.delete_schema(session)
 cassandra1.cmodel.create_schema(session)
 cassandra1.cmodel.bulk_insert(session)
 
