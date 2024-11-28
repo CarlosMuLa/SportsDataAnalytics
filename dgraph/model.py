@@ -8,6 +8,8 @@ def create_client():
     return DgraphClient(stub)
 
 def set_schema(client):
+#drop the data if it exists
+    client.alter(pydgraph.Operation(drop_all=True))
     schema = """
         type Country {
             country_id: string
@@ -170,22 +172,29 @@ def get_player_stats_by_league(client, league_name):
     txn = client.txn(read_only=True)
     try:
         res = txn.query(query)
-        data = json.loads(res.json)
-        if data["league"]:
-            league = data["league"][0]
-            print(f"League: {league['name']}")
-            for player in league.get("includes", []):
-                print(f"Player: {player['name']}")
-                stats = player.get("has_stats", {})
-                print(f"Matches: {stats.get('matches', 'N/A')}")
-                print(f"Assists: {stats.get('assists', 'N/A')}")
-                print(f"Goals: {stats.get('goals', 'N/A')}")
+        data = json.loads(res.json())  # Usar .json() en lugar de .decode()
+
+        if "league" in data and data["league"]:
+            league_data = data["league"][0]
+            print(f"League: {league_data['name']}")
+            for player in league_data.get("includes", []):
+                player_name = player['name']
+                player_stats = player.get('has_stats', {})
+                matches = player_stats.get('matches', 'N/A')
+                assists = player_stats.get('assists', 'N/A')
+                goals = player_stats.get('goals', 'N/A')
+
+                print(f"\nPlayer: {player_name}")
+                print(f"Matches: {matches}")
+                print(f"Assists: {assists}")
+                print(f"Goals: {goals}")
         else:
-            print("League not found.")
+            print(f"League '{league_name}' not found.")
     except Exception as e:
         print(f"Error: {e}")
     finally:
         txn.discard()
+
 
 def get_player_stats_by_country(client, country_name):
     query = f"""
@@ -203,22 +212,31 @@ def get_player_stats_by_country(client, country_name):
     txn = client.txn(read_only=True)
     try:
         res = txn.query(query)
-        data = json.loads(res.json)
+        data = json.loads(res.decode("utf-8"))  # Cambio de decode a json
+        
         if "players" in data and len(data["players"]) > 0:
             print(f"\nPlayers from {country_name}:")
             for player in data["players"]:
-                print(f"Name: {player['name']}")
-                stats = player.get("stats", [])
-                if stats:
-                    print(f"Matches: {stats[0].get('matches', 'N/A')}")
-                    print(f"Assists: {stats[0].get('assists', 'N/A')}")
-                    print(f"Goals: {stats[0].get('goals', 'N/A')}")
+                player_name = player['name']
+                player_stats = player.get('stats', [])
+                if player_stats:
+                    matches = player_stats[0].get('matches', 'N/A')
+                    assists = player_stats[0].get('assists', 'N/A')
+                    goals = player_stats[0].get('goals', 'N/A')
+
+                    print(f"\nName: {player_name}")
+                    print(f"Matches: {matches}")
+                    print(f"Assists: {assists}")
+                    print(f"Goals: {goals}")
+                else:
+                    print(f"Stats not available for {player_name}.")
         else:
             print(f"\nNo players found from {country_name}.")
     except Exception as e:
         print(f"\nError while querying player stats by country: {e}")
     finally:
         txn.discard()
+
 
 
 def get_player_stats_by_age(client, min_age):
@@ -238,7 +256,8 @@ def get_player_stats_by_age(client, min_age):
     txn = client.txn(read_only=True)
     try:
         res = txn.query(query)
-        data = json.loads(res.json())
+        data = json.loads(res.json())  # Cambié el método decode() por json()
+        
         if data['players']:
             print(f"\nPlayers older than {min_age} years:")
             for player in data['players']:
@@ -257,13 +276,13 @@ def get_player_stats_by_age(client, min_age):
     finally:
         txn.discard()
 
+
 def get_basic_player_stats(client, player_name):
     query = f"""
     {{
         player(func: eq(name, "{player_name}")) {{
             name
             has_stats {{
-                stats_id
                 matches
                 assists
                 goals
@@ -271,50 +290,71 @@ def get_basic_player_stats(client, player_name):
         }}
     }}
     """
+    print(f"Query: {query}")
     txn = client.txn(read_only=True)
     try:
         res = txn.query(query)
         data = json.loads(res.json)
-        if "player" in data and len(data["player"]) > 0:
+        if data["player"]:
+            #print(data)
+            #print("hola"+str(data["player"]))
             player_data = data["player"][0]
-            print(f"Player: {player_data['name']}")
-            stats = player_data.get("has_stats", [])
-            if stats:
-                for stat in stats:
-                    print(f"Stats ID: {stat['stats_id']}")
-                    print(f"  Matches: {stat.get('matches', 'N/A')}")
-                    print(f"  Assists: {stat.get('assists', 'N/A')}")
-                    print(f"  Goals: {stat.get('goals', 'N/A')}")
+            player_stats = data["player"][1]
+            #print type of player_stats
+            has_stats = player_stats.get("has_stats", [])
+           # print(player_data)
+            if player_stats:
+                print(f"Matches: {has_stats.get('matches', 'N/A')}")
+                print(f"Assists: {has_stats.get('assists', 'N/A')}")
+                print(f"Goals: {has_stats.get('goals', 'N/A')}")
+            else:
+                print("No stats available.")
         else:
-            print(f"No data found for player: {player_name}")
+            print("Player not found.")
     except Exception as e:
-        print(f"Error while querying player stats: {e}")
+        print(f"Error: {e}")
     finally:
         txn.discard()
 
- 
-def search_players(client, search_term):
+def search_players(client, player_name):
     query = f"""
     {{
-        players(func: has(name), first: 10) @filter(regex(name, /{search_term}/i)) {{
+        player(func: eq(name, "{player_name}")) {{
             name
-            player_id  # Esta es la relación con el player_id
+            has_stats {{
+                matches
+                assists
+                goals
+            }}
         }}
     }}
     """
+    print(f"Query: {query}")
     txn = client.txn(read_only=True)
     try:
         res = txn.query(query)
         data = json.loads(res.json)
-        if data and "players" in data:
-            for player in data["players"]:
-                print(f"Name: {player['name']}, ID: {player['player_id']}")
+        if data["player"]:
+            #print(data)
+            #print("hola"+str(data["player"]))
+            player_data = data["player"][0]
+            player_stats = data["player"][1]
+            #print type of player_stats
+            has_stats = player_stats.get("has_stats", [])
+           # print(player_data)
+            if player_stats:
+                print(f"Matches: {has_stats.get('matches', 'N/A')}")
+                print(f"Assists: {has_stats.get('assists', 'N/A')}")
+                print(f"Goals: {has_stats.get('goals', 'N/A')}")
+            else:
+                print("No stats available.")
         else:
-            print("No players found.")
+            print("Player not found.")
     except Exception as e:
-        print(f"Error while searching players: {e}")
+        print(f"Error: {e}")
     finally:
         txn.discard()
+
 
 def compare_players(client, player_id_1, player_id_2):
     query = f"""
@@ -356,7 +396,7 @@ def compare_players(client, player_id_1, player_id_2):
 def get_top_scorers(client):
     query = """
     {
-        topScorers(func: type(PlayerStats), orderdesc: goals, first: 10) {
+        topScorers(func: type(PlayerStats), orderdesc: goals, first: 2) {
             name
             goals
             belongs_to {
@@ -365,17 +405,25 @@ def get_top_scorers(client):
         }
     }
     """
+    print(f"Query: {query}")  # Imprime la consulta que se está ejecutando
     txn = client.txn(read_only=True)
     try:
         res = txn.query(query)
-        data = json.loads(res.json)
-        if data and "topScorers" in data:
+        
+        # Cargar la respuesta en JSON
+        data = json.loads(res.json)  # `res.json` para acceder directamente al JSON
+        print(f"Decoded JSON data: {data}")  # Muestra el JSON decodificado para verificar la estructura
+        
+        if data["topScorers"]:
             for scorer in data["topScorers"]:
-                print(f"Name: {scorer['name']}, Goals: {scorer['goals']}, Team: {scorer['belongs_to'][0]['name']}")
+                player_name = scorer.get("name", "N/A")
+                player_goals = scorer.get("goals", "N/A")
+                team_name = scorer.get("belongs_to", [{}])[0].get("name", "N/A")
+
+                print(f"Name: {player_name}, Goals: {player_goals}, Team: {team_name}")
         else:
             print("No top scorers found.")
     except Exception as e:
-        print(f"Error while querying top scorers: {e}")
+        print(f" {e}")
     finally:
         txn.discard()
-
