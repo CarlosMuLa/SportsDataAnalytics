@@ -47,13 +47,13 @@ functions = {"1": "Show Teams",
 # Set logger
 log = logging.getLogger()
 log.setLevel('INFO')
-handler = logging.FileHandler('investments.log')
+handler = logging.FileHandler('locura.log')
 handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
 log.addHandler(handler)
 
 # Read env vars releated to Cassandra App
 CASSANDRA_CLUSTER_IPS = os.getenv('CASSANDRA_CLUSTER_IPS', 'localhost')
-KEYSPACE = os.getenv('CASSANDRA_KEYSPACE', 'investments')
+KEYSPACE = os.getenv('CASSANDRA_KEYSPACE', 'locura')
 REPLICATION_FACTOR = os.getenv('CASSANDRA_REPLICATION_FACTOR', '1')
 
 log.info("Connecting to Cluster")
@@ -74,10 +74,7 @@ MONGO_BASE_URL = "http://localhost:8000"
 
 dgraph_client = create_client()
 set_schema(dgraph_client)
-def load_data(client):
-    create_data(client)  
-    print("Data loaded into the database.")
-
+create_data(dgraph_client)
 
 
 

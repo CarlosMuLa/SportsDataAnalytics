@@ -38,6 +38,7 @@ def set_schema(client):
         }
 
         country_id: string @index(hash) .
+        stats_id: string @index(exact) .
         league_id: string @index(hash) .
         name: string @index(exact) .
         age: int @index(int) .
@@ -124,6 +125,7 @@ def analyze_player_performance(client, player_name):
         }}
     }}
     """
+    print(f"Query: {query}")
     txn = client.txn(read_only=True)
     try:
         res = txn.query(query)
