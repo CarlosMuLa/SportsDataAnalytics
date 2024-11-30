@@ -130,18 +130,7 @@ CREATE_TEAM_RANKING = """
     ) WITH CLUSTERING ORDER BY (ranking DESC)
 """ 
 
-CREATE_AFITION_STATUS = """
-    CREATE TABLE IF NOT EXISTS afition_status (
-        stadium_id DECIMAL,
-        name TEXT,  
-        country TEXT,  
-        capacity DECIMAL,
-        average_assistance DECIMAL,
-        areas LIST<TEXT>,
-        next_match TIMESTAMP,
-        PRIMARY KEY ((country), capacity)
-    ) WITH CLUSTERING ORDER BY (capacity DESC)
-""" 
+    
 
 #8
 CREATE_TEAM_BUDGETS = """
